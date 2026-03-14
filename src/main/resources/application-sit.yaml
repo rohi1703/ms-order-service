@@ -1,0 +1,16 @@
+server:
+  port: 9090
+
+spring:
+  datasource:
+    url: <sitenv-db-url fetch from vault>
+    driverClassName: org.h2.Driver
+    username: <fetch from vault>
+    password: <fetch from vault>
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  h2:
+    console:
+      enabled: true
