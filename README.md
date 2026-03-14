@@ -201,6 +201,7 @@ The service follows a layered architecture with clear separation of concerns:
  
 
 ```
+## Architecture
 
   Controller - REST API, validation, HTTP concerns
 
