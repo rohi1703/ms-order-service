@@ -392,7 +392,10 @@ If I were taking this to production, here's what I'd tackle, roughly in order of
 
 ### Things that need to happen first
 
-- Swap H2 for PostgreSQL (or MySQL or Nosql). The in-memory DB loses everything on restart and behaves differently from real databases in subtle ways.
+- Swap H2 for PostgreSQL (or MySQL or Nosql). The in-memory DB loses everything on restart and behaves differently from real databases in subtle ways. My choice would be postgres DB as orderService is a classic OLTP (Online Transaction Processing) workload.
+Mysql is also a good option but postgres suits more here due to better JSON support, handles cocurrent writes more gracefully and is more future-proof for this case. 
+
+- Add indexes. The `findByStatus` query will do a full table scan without an index on the `status` column.
 
 - Add Flyway or Liquibase for database migrations. `ddl-auto: create-drop` is a non-starter in production — it literally drops all your tables.
 
@@ -403,8 +406,6 @@ If I were taking this to production, here's what I'd tackle, roughly in order of
 - Fix the catch-all exception handler. It currently swallows the stack trace completely. A single `log.error("Unexpected error", ex)` would save hours of debugging.
 
 - Add Spring Boot Actuator for health checks, readiness/liveness probes. Essential if you're running in Kubernetes or behind a load balancer.
-
-- Add indexes. The `findByStatus` query will do a full table scan without an index on the `status` column.
 
 - fetching passwords, secrets from secret store or vault — The H2 console should definitely not be enabled in production.
 
@@ -420,9 +421,7 @@ If I were taking this to production, here's what I'd tackle, roughly in order of
 
 - performance testing to validate behavior under pressure, especially around optimistic lock contention.
 
-- CircuitBreaker around downstream calls
-
-
+- CircuitBreaker around downstream calls.
 
 
 ### Things I'd want shortly after
