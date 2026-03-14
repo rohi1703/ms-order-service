@@ -112,12 +112,6 @@ The service starts on http://localhost:8081.
 
 ### Useful URLs
 
-
-
-| URL | Description |
-
-|-----|-------------|
-
 | http://localhost:8081/ms-order-service/swagger-ui | Interactive API docs (Swagger UI) |
 
 | http://localhost:8081/ms-order-service/api-docs | OpenAPI 3.0 spec (JSON) |
@@ -132,11 +126,7 @@ The service starts on http://localhost:8081.
 
 ## API Endpoints
 
-
-
 | Method | Endpoint | Description | Status Codes |
-
-|--------|----------|-------------|--------------|
 
 | `POST` | `/api/orders` | Create a new order | `201`, `400`, `500`|
 
@@ -212,79 +202,45 @@ The service follows a layered architecture with clear separation of concerns:
 
 ```
 
-┌─────────────┐
+  Controller - REST API, validation, HTTP concerns
 
-│  Controller  │  ← REST API, validation, HTTP concerns
+  Service  - Business logic, transaction boundaries
 
-├─────────────┤
+  Domain - Entities, state machine, business rules
+ 
+  Repository - Data access (Spring Data JPA)
 
-│   Service    │  ← Business logic, transaction boundaries
-
-├─────────────┤
-
-│   Domain     │  ← Entities, state machine, business rules
-
-├─────────────┤
-
-│  Repository  │  ← Data access (Spring Data JPA)
-
-├─────────────┤
-
-│   H2 (mem)   │  ← In-memory relational database
-
-└─────────────┘
+  H2 (mem) - In-memory relational database
 
 ```
 
 ## Domain Model
-
- 
-
 ```
 
-Order (1) ──── (*) OrderItem
-
-│
-
-├── id: UUID (generated)
-
-├── customerName: String
-
-├── customerEmail: String
-
-├── status: OrderStatus (PENDING | PROCESSING | COMPLETED | FAILED)
-
-├── totalAmount: BigDecimal (derived from items)
-
-├── createdAt: LocalDateTime
-
-├── updatedAt: LocalDateTime
+Order (1) ── (*) OrderItem
+ 
+id: UUID (generated)
+customerName: String
+customerEmail: String
+status: OrderStatus (PENDING | PROCESSING | COMPLETED | FAILED)
+totalAmount: BigDecimal (derived from items)
+createdAt: LocalDateTime
+updatedAt: LocalDateTime
 
 
 
 OrderItem
-
-├── id: Long (generated)
-
-├── productName: String
-
-├── quantity: int
-
-├── unitPrice: BigDecimal
-
-└── subtotal: BigDecimal (unitPrice × quantity)
+id: Long (generated)
+productName: String
+quantity: int
+unitPrice: BigDecimal
+subtotal: BigDecimal (unitPrice × quantity)
 
 ```
 
  
 
----
-
- 
-
 ## Order Lifecycle (State Machine)
-
- 
 
 ```
 
@@ -295,8 +251,6 @@ PENDING ───► PROCESSING ───► COMPLETED
     └───► FAILED ◄──┘
 
 ```
-
- 
 
 - PENDING — Initial state when an order is created.
 
@@ -310,19 +264,13 @@ PENDING ───► PROCESSING ───► COMPLETED
 
 Invalid transitions return 409 Conflict with a descriptive error message.
 
- 
-
 ---
 
  
 
 ## Validation
 
- 
-
 | Field | Rule |
-
-|-------|------|
 
 | `customerName` | Required, non-blank |
 
@@ -336,13 +284,11 @@ Invalid transitions return 409 Conflict with a descriptive error message.
 
 | `items[].unitPrice` | Required, minimum 0.01 |
 
- 
 
 Validation errors return 400 Bad Request with field-level details:
 
- 
 
-```json
+json
 
 {
     "status": 400,
@@ -365,15 +311,9 @@ Validation errors return 400 Bad Request with field-level details:
 
 ## Error Handling
 
-
-
 All errors follow a consistent `ErrorResponse` structure:
 
-
-
 | HTTP Status | Scenario |
-
-|-------------|----------|
 
 | `400` | Validation failure, malformed request |
 
@@ -385,8 +325,6 @@ All errors follow a consistent `ErrorResponse` structure:
 
 
 ---
-
-
 
 ## Assumptions
 
